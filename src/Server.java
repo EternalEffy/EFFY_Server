@@ -6,35 +6,28 @@ import java.nio.charset.StandardCharsets;
 public class Server {
     private static Socket clientSocket;
     private static ServerSocket server;
-    private static BufferedReader in;
-    private static BufferedWriter out;
+    private static DataInputStream inStream;
+    private static DataOutputStream outStream;
+    private static String message ="Подключение установлено";
 
     public static void main(String[] args) {
             try {
-                server = new ServerSocket(3310,1);
+                server = new ServerSocket(3320);
                 System.out.println("Сервер запущен");
+
                 while (true) {
                     clientSocket = server.accept();
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-
+                    inStream= new DataInputStream(clientSocket.getInputStream());
+                    outStream=new DataOutputStream((clientSocket.getOutputStream()));
                     if(clientSocket.isConnected()){
-                        System.out.println("Клиент " + new String(in.readLine().getBytes(StandardCharsets.UTF_8)) + " с ip адреса: " + clientSocket.getInetAddress() + " подключен");
-                        out.write("Подключение установлено" + "\n");
-                        out.flush();
+                        System.out.println("Клиент "+ inStream.readUTF()+ " с ip-адресом: " + clientSocket.getInetAddress()+ " подключился.");
+                        outStream.writeUTF(message);
+                        outStream.flush();
                     }
                 }
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
-            finally {
-                try {
-                    server.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
     }
 }
